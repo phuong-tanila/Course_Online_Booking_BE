@@ -71,6 +71,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .accessDeniedPage("/403")
                 .and()
                 .addFilterBefore(new CustomAuthenticationFilter(userService), UsernamePasswordAuthenticationFilter.class);
+//        http.csrf().disable()
+////                .authorizeRequests()
+////                .antMatchers("/", "/logout", "/login", "/register", "/courses/**", "/course-detail/**", "/category/**")
+////                    .permitAll()
+////                .anyRequest()
+////                    .authenticated()
+////                .and()
+////                    .exceptionHandling()
+////                    .accessDeniedPage("/403")
+////                .and()
+////                .addFilterBefore(new CustomAuthenticationFilter(userService), UsernamePasswordAuthenticationFilter.class);
 
 
 //        http.authorizeRequests().antMatchers("/user-info").access("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')");

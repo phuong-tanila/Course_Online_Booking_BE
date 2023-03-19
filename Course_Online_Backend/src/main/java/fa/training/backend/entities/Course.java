@@ -26,7 +26,6 @@ public class Course implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column
 	public int id;
-//	@JsonIgnore
 	@Column(length = Integer.MAX_VALUE)
 	public String courseName;
 	@Column(length = Integer.MAX_VALUE)

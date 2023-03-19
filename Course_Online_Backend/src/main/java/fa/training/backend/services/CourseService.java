@@ -111,6 +111,10 @@ public class CourseService {
     }
 //	public List<Course> sortByRating
     public int totalCourseByCate(int categoryId){
-        return courseRepository.countAllCourses(categoryId);
+        return courseRepository.countAllCoursesByCate(categoryId);
+    }
+
+    public int totalCourse(){
+        return courseRepository.countAllCourse();
     }
 }

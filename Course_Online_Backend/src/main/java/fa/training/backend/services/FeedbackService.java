@@ -26,7 +26,7 @@ public class FeedbackService {
 		if (pagedResult.hasContent()) {
 			return pagedResult.getContent();
 		} else {
-			throw new RecordNotFoundException("ads");
+			return new ArrayList<>();
 		}
 	}
 

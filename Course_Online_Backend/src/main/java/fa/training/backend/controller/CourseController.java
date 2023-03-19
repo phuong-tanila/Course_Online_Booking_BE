@@ -96,7 +96,7 @@ public class CourseController {
         return new ResponseEntity<List<CourseModel>>(result, new HttpHeaders(), HttpStatus.OK);
     }
     @GetMapping("/slider-newest")
-    public ResponseEntity<List<CourseModel>> getCoursesNewest(
+    public ResponseEntity<List<CourseModel>> getCourses10Newest(
             @RequestParam(defaultValue = "0") Integer pageNo,
             @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(defaultValue = "createDate") String sortBy) {
@@ -105,6 +105,29 @@ public class CourseController {
         listCourses.forEach(c -> result.add(courseMapper.toModel(c)));
         return new ResponseEntity<List<CourseModel>>(result, new HttpHeaders(), HttpStatus.OK);
     }
+
+    @GetMapping("/newest")
+    public ResponseEntity<List<CourseModel>> getCoursesNewest(
+            @RequestParam(defaultValue = "0") Integer pageNo,
+            @RequestParam(defaultValue = "20") Integer pageSize,
+            @RequestParam(defaultValue = "createDate") String sortBy) {
+        List<Course> listCourses = courseService.getAllCourses(pageNo, pageSize, sortBy);
+        List<CourseModel> result = new ArrayList<>();
+        listCourses.forEach(c -> result.add(courseMapper.toModel(c)));
+        return new ResponseEntity<List<CourseModel>>(result, new HttpHeaders(), HttpStatus.OK);
+    }
+
+    @GetMapping("/total-course")
+    public int totalCourse (){
+        try {
+            return courseService.totalCourse();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
+
 //    @GetMapping("/list")
 //    public ResponseEntity<List<CourseModel>> getAllCourses(
 //            @RequestParam(defaultValue = "0") Integer pageNo,
