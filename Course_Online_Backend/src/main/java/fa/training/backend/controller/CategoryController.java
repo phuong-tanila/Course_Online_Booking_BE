@@ -6,6 +6,7 @@ import fa.training.backend.exception.RecordNotFoundException;
 import fa.training.backend.mapper.CategoryMapper;
 import fa.training.backend.mapper.CourseMapper;
 import fa.training.backend.mapper.FeedbackMapper;
+import fa.training.backend.model.CategoryModels.CategoryModel;
 import fa.training.backend.model.CategoryModels.CategoryModelDetail;
 import fa.training.backend.model.CourseModel;
 import fa.training.backend.services.CategoryService;
@@ -25,7 +26,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/category")
+@RequestMapping("/categories")
 public class CategoryController {
     @Autowired
     public CategoryService categoryService;
@@ -56,7 +57,7 @@ public class CategoryController {
         }
     }
 
-    @GetMapping("total-course/{id}")
+    @GetMapping("/total-course/{id}")
     public int totalCourseByCate (
             @PathVariable("id") int id
     ){
@@ -68,15 +69,20 @@ public class CategoryController {
         }
     }
 
-    @GetMapping("")
-    public ResponseEntity<List<CourseModel>> getAllCourses(
-            @RequestParam(defaultValue = "0") Integer pageNo,
-            @RequestParam(defaultValue = "5") Integer pageSize,
-            @RequestParam(defaultValue = "id") String sortBy) {
-        List<Course> listCourses = courseService.getAllCourses(pageNo, pageSize, sortBy);
-        List<CourseModel> result = courseMapper.toListModel(listCourses);
-        return new ResponseEntity<List<CourseModel>>(result, new HttpHeaders(), HttpStatus.OK);
+//    @GetMapping("")
+//    public ResponseEntity<List<CourseModel>> getAllCourses(
+//            @RequestParam(defaultValue = "0") Integer pageNo,
+//            @RequestParam(defaultValue = "5") Integer pageSize,
+//            @RequestParam(defaultValue = "id") String sortBy) {
+//        List<Course> listCourses = courseService.getAllCourses(pageNo, pageSize, sortBy);
+//        List<CourseModel> result = courseMapper.toListModel(listCourses);
+//        return new ResponseEntity<List<CourseModel>>(result, new HttpHeaders(), HttpStatus.OK);
+//    }
+
+    @GetMapping("/")
+    public ResponseEntity<List<CategoryModel>> getAllCategory(){
+        List<Category> listCategory = categoryService.getAllCategory();
+        List<CategoryModel> result = categoryMapper.toListModel(listCategory);
+        return new ResponseEntity<List<CategoryModel>>(result, new HttpHeaders(), HttpStatus.OK);
     }
-
-
 }
