@@ -56,17 +56,32 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable()
+        http
+                .csrf()
+                .disable()
                 .authorizeRequests()
                 .antMatchers("/", "/logout", "/login", "/register")
-                    .permitAll()
+                .permitAll()
+                .antMatchers( HttpMethod.GET ,"/courses/**", "/course-detail/**", "/categories/**")
+                .permitAll()
                 .anyRequest()
-                    .authenticated()
+                .authenticated()
                 .and()
-                    .exceptionHandling()
-                    .accessDeniedPage("/403")
+                .exceptionHandling()
+                .accessDeniedPage("/403")
                 .and()
                 .addFilterBefore(new CustomAuthenticationFilter(userService), UsernamePasswordAuthenticationFilter.class);
+//        http.csrf().disable()
+////                .authorizeRequests()
+////                .antMatchers("/", "/logout", "/login", "/register", "/courses/**", "/course-detail/**", "/category/**")
+////                    .permitAll()
+////                .anyRequest()
+////                    .authenticated()
+////                .and()
+////                    .exceptionHandling()
+////                    .accessDeniedPage("/403")
+////                .and()
+////                .addFilterBefore(new CustomAuthenticationFilter(userService), UsernamePasswordAuthenticationFilter.class);
 
 
 //        http.authorizeRequests().antMatchers("/user-info").access("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')");

@@ -16,7 +16,7 @@ import fa.training.backend.repositories.CategoryRepository;
 public class CategoryService {
 	@Autowired
 	CategoryRepository categoryRepository;
-	public List<Category> getAll() {
+	public List<Category> getAllCategory() {
         return categoryRepository.findAll();
     }
 	public Category getCategoryByName(String categoryName) {
