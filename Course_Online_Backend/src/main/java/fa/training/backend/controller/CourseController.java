@@ -105,7 +105,6 @@ public class CourseController {
         listCourses.forEach(c -> result.add(courseMapper.toModel(c)));
         return new ResponseEntity<List<CourseModel>>(result, new HttpHeaders(), HttpStatus.OK);
     }
-
 //    @GetMapping("/list")
 //    public ResponseEntity<List<CourseModel>> getAllCourses(
 //            @RequestParam(defaultValue = "0") Integer pageNo,
