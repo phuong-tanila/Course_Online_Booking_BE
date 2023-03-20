@@ -46,4 +46,8 @@ public class UserService implements UserDetailsService {
 	public List<Integer> checkExistUserEmailorPhone(String email, String phone){
 		return userRepository.checkExistUserEmailorPhone(email, phone);
 	}
+
+	public User findUserById(int id, String role){
+		return userRepository.findUserById(id, role);
+	}
 }

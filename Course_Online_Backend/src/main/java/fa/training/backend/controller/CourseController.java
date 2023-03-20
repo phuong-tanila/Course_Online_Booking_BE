@@ -85,32 +85,22 @@ public class CourseController {
         return new ResponseEntity<CourseModel>(courseModel, new HttpHeaders(), HttpStatus.OK);
     }
 
-    @GetMapping("/slider-popular")
-    public ResponseEntity<List<CourseModel>> getCoursesPopular(
-            @RequestParam(defaultValue = "0") Integer pageNo,
-            @RequestParam(defaultValue = "10") Integer pageSize,
-            @RequestParam(defaultValue = "soldCount") String sortBy) {
-        List<Course> listCourses = courseService.getAllCourses(pageNo, pageSize, sortBy);
-        List<CourseModel> result = new ArrayList<>();
-        listCourses.forEach(c -> result.add(courseMapper.toModel(c)));
-        return new ResponseEntity<List<CourseModel>>(result, new HttpHeaders(), HttpStatus.OK);
-    }
-    @GetMapping("/slider-newest")
+    @GetMapping("/slider/{sortBy}")
     public ResponseEntity<List<CourseModel>> getCourses10Newest(
             @RequestParam(defaultValue = "0") Integer pageNo,
             @RequestParam(defaultValue = "10") Integer pageSize,
-            @RequestParam(defaultValue = "createDate") String sortBy) {
+            @PathVariable("sortBy") String sortBy) {
         List<Course> listCourses = courseService.getAllCourses(pageNo, pageSize, sortBy);
         List<CourseModel> result = new ArrayList<>();
         listCourses.forEach(c -> result.add(courseMapper.toModel(c)));
         return new ResponseEntity<List<CourseModel>>(result, new HttpHeaders(), HttpStatus.OK);
     }
 
-    @GetMapping("/newest")
+    @GetMapping("/list/{sortBy}")
     public ResponseEntity<List<CourseModel>> getCoursesNewest(
             @RequestParam(defaultValue = "0") Integer pageNo,
             @RequestParam(defaultValue = "20") Integer pageSize,
-            @RequestParam(defaultValue = "createDate") String sortBy) {
+            @PathVariable("sortBy") String sortBy) {
         List<Course> listCourses = courseService.getAllCourses(pageNo, pageSize, sortBy);
         List<CourseModel> result = new ArrayList<>();
         listCourses.forEach(c -> result.add(courseMapper.toModel(c)));
