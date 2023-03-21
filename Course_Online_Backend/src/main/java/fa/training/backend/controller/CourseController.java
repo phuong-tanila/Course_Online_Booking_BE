@@ -37,16 +37,16 @@ import org.springframework.data.domain.Sort.Order;
 //@RequestMapping(path="/JSON", produces="application/json")
 public class CourseController {
 
-	@Autowired
-	public CourseService courseService;
-	@Autowired
-	public CategoryService categoryService;
+    @Autowired
+    public CourseService courseService;
+    @Autowired
+    public CategoryService categoryService;
 
     @Autowired
     public FeedbackService feedbackService;
 
-	@Autowired
-	private CourseMapper courseMapper;
+    @Autowired
+    private CourseMapper courseMapper;
     @Autowired
     public CategoryMapper categoryMapper;
     @Autowired
@@ -68,7 +68,7 @@ public class CourseController {
     @GetMapping("/{id}")
     ResponseEntity<CourseModel> getCourseByIdIsActive(@PathVariable("id") int id) throws RecordNotFoundException {
         Course course = courseService.findById(id);
-        CourseModel courseModel= courseMapper.toModel(course);
+        CourseModel courseModel = courseMapper.toModel(course);
         HashMap<String, String> orders = new HashMap<>();
         orders.put("createAt", "desc");
         List<Feedback> feedbacks = feedbackService.getFeedbacksByCourseId(id, 1, 5, orders);
@@ -108,7 +108,7 @@ public class CourseController {
     }
 
     @GetMapping("/total-course")
-    public int totalCourse (){
+    public int totalCourse() {
         try {
             return courseService.totalCourse();
         } catch (Exception e) {
@@ -201,6 +201,25 @@ public class CourseController {
 
     private Sort.Direction getSortDirection(String direction) {
         return direction.equals("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<CourseModel>> searchCourses(
+            @RequestParam String name,
+            @RequestParam(defaultValue = "0") Integer pageNo,
+            @RequestParam(defaultValue = "5") Integer pageSize,
+            @RequestParam(defaultValue = "id,desc") String[] sort) {
+        try {
+            Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortOrder.getSortOrder(sort)));
+            List<Course> courses = courseService.searchCoursesByName(name, pageable);
+            List<CourseModel> result = courseMapper.toListModel(courses);
+            if (result.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/b")

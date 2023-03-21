@@ -60,12 +60,12 @@ public class CourseService {
     public Course findById(int id) throws RecordNotFoundException {
         Optional<Course> course = courseRepository.findById(id);
         if (course.isPresent()) {
-			System.out.println(course.get().chapters);
-			return course.get();
-		} else {
-			throw new RecordNotFoundException("No course exist for given id");
-		}
-       
+            System.out.println(course.get().chapters);
+            return course.get();
+        } else {
+            throw new RecordNotFoundException("No course exist for given id");
+        }
+
     }
 
     public Optional<Course> findByIdIsActive(int id) {
@@ -105,16 +105,22 @@ public class CourseService {
         return courses;
     }
 
+    public List<Course> searchCoursesByName(String name, Pageable pageable) {
+        List<Course> courses = courseRepository.searchCoursesByName(name, new Date(), pageable);
+        return courses;
+    }
+
     public List<Course> findCourseByCategory(List<Category> categories) {
         List<Course> courses = courseRepository.findCourseByCategoriesIn(categories);
         return courses;
     }
-//	public List<Course> sortByRating
-    public int totalCourseByCate(int categoryId){
+
+    //	public List<Course> sortByRating
+    public int totalCourseByCate(int categoryId) {
         return courseRepository.countAllCoursesByCate(categoryId);
     }
 
-    public int totalCourse(){
+    public int totalCourse() {
         return courseRepository.countAllCourse();
     }
 }
