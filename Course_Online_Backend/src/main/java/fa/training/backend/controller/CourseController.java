@@ -155,27 +155,42 @@ public class CourseController {
         return new ResponseEntity<CourseModel>(courseModel, new HttpHeaders(), HttpStatus.OK);
     }
 
-    @GetMapping("/slider-popular")
-    public ResponseEntity<List<CourseModel>> getCoursesPopular(
+    @GetMapping("/slider/{sortBy}")
+    public ResponseEntity<List<CourseModel>> getCourses10Newest(
             @RequestParam(defaultValue = "0") Integer pageNo,
             @RequestParam(defaultValue = "10") Integer pageSize,
-            @RequestParam(defaultValue = "soldCount") String sortBy) {
+            @PathVariable("sortBy") String sortBy) {
         List<Course> listCourses = courseService.getAllCourses(pageNo, pageSize, sortBy);
         List<CourseModel> result = new ArrayList<>();
         listCourses.forEach(c -> result.add(courseMapper.toModel(c)));
         return new ResponseEntity<List<CourseModel>>(result, new HttpHeaders(), HttpStatus.OK);
     }
 
+<<<<<<< HEAD
     @GetMapping("/slider-newest")
+=======
+    @GetMapping("/list/{sortBy}")
+>>>>>>> e050d48af697ccf1e4d67fa2fa51bb6a69801cd4
     public ResponseEntity<List<CourseModel>> getCoursesNewest(
             @RequestParam(defaultValue = "0") Integer pageNo,
-            @RequestParam(defaultValue = "10") Integer pageSize,
-            @RequestParam(defaultValue = "createDate") String sortBy) {
+            @RequestParam(defaultValue = "20") Integer pageSize,
+            @PathVariable("sortBy") String sortBy) {
         List<Course> listCourses = courseService.getAllCourses(pageNo, pageSize, sortBy);
         List<CourseModel> result = new ArrayList<>();
         listCourses.forEach(c -> result.add(courseMapper.toModel(c)));
         return new ResponseEntity<List<CourseModel>>(result, new HttpHeaders(), HttpStatus.OK);
     }
+
+    @GetMapping("/total-course")
+    public int totalCourse() {
+        try {
+            return courseService.totalCourse();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
 
 //    @GetMapping("/list")
 //    public ResponseEntity<List<CourseModel>> getAllCourses(
@@ -259,6 +274,25 @@ public class CourseController {
 
     private Sort.Direction getSortDirection(String direction) {
         return direction.equals("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<CourseModel>> searchCourses(
+            @RequestParam String name,
+            @RequestParam(defaultValue = "0") Integer pageNo,
+            @RequestParam(defaultValue = "5") Integer pageSize,
+            @RequestParam(defaultValue = "id,desc") String[] sort) {
+        try {
+            Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortOrder.getSortOrder(sort)));
+            List<Course> courses = courseService.searchCoursesByName(name, pageable);
+            List<CourseModel> result = courseMapper.toListModel(courses);
+            if (result.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/b")

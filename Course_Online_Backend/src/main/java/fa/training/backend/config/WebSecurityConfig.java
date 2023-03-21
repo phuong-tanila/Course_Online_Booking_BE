@@ -63,6 +63,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf()
                 .disable()
                 .authorizeRequests()
+<<<<<<< HEAD
                 .antMatchers("/auth", "/auth/login/**", "/auth/register", "/auth/refresh")
                 .permitAll()
                 .antMatchers(HttpMethod.GET, "/courses/", "/categories/")
@@ -78,6 +79,31 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         new CustomAuthenticationFilter(userService),
                         UsernamePasswordAuthenticationFilter.class
                 );
+=======
+                .antMatchers("/", "/logout", "/login", "/register")
+                .permitAll()
+                .antMatchers( HttpMethod.GET ,"/courses/**", "/course-detail/**", "/categories/**", "/user/**")
+                .permitAll()
+                .anyRequest()
+                .authenticated()
+                .and()
+                .exceptionHandling()
+                .accessDeniedPage("/403")
+                .and()
+                .addFilterBefore(new CustomAuthenticationFilter(userService), UsernamePasswordAuthenticationFilter.class);
+//        http.csrf().disable()
+////                .authorizeRequests()
+////                .antMatchers("/", "/logout", "/login", "/register", "/courses/**", "/course-detail/**", "/category/**")
+////                    .permitAll()
+////                .anyRequest()
+////                    .authenticated()
+////                .and()
+////                    .exceptionHandling()
+////                    .accessDeniedPage("/403")
+////                .and()
+////                .addFilterBefore(new CustomAuthenticationFilter(userService), UsernamePasswordAuthenticationFilter.class);
+
+>>>>>>> e050d48af697ccf1e4d67fa2fa51bb6a69801cd4
 
 //        http.authorizeRequests().antMatchers("/user-info").access("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')");
 //

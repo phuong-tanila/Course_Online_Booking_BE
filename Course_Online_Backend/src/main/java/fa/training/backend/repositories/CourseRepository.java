@@ -41,5 +41,9 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
     public List<Course> findByCourseNameIgnoreCaseContaining(String courseName, Pageable pageable);
 
     @Query("select count(c.id) from Course c JOIN c.categories ct WHERE ct.id = ?1")
-    public int countAllCourses(int categoryId);
+    public int countAllCoursesByCate(int categoryId);
+    @Query("select count(c.id) from Course c")
+    public int countAllCourse();
+    @Query("SELECT c FROM Course c WHERE c.courseName LIKE %?1% AND c.createDate < ?2")
+    public List<Course> searchCoursesByName(String name, Date date, Pageable pageable);
 }
