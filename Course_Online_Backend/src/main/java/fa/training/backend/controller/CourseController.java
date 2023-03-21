@@ -166,11 +166,7 @@ public class CourseController {
         return new ResponseEntity<List<CourseModel>>(result, new HttpHeaders(), HttpStatus.OK);
     }
 
-<<<<<<< HEAD
-    @GetMapping("/slider-newest")
-=======
     @GetMapping("/list/{sortBy}")
->>>>>>> e050d48af697ccf1e4d67fa2fa51bb6a69801cd4
     public ResponseEntity<List<CourseModel>> getCoursesNewest(
             @RequestParam(defaultValue = "0") Integer pageNo,
             @RequestParam(defaultValue = "20") Integer pageSize,
