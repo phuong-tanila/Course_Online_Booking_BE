@@ -7,11 +7,11 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 @AllArgsConstructor
 @Getter @Setter
 //@ConfigurationProperties(prefix ="token")
@@ -32,11 +32,17 @@ public class JwtProvider {
         System.out.println(jwtSecret);
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpiration);
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("role", user.getRole());
+        claims.put("fullname", user.getFullname());
+        claims.put("avatar", user.getAvatar());
         // Tạo chuỗi json web token từ id của user.
         return Jwts.builder()
+                .setClaims(claims)
                 .setSubject(user.getEmail())
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
+                
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)
                 .compact();
     }

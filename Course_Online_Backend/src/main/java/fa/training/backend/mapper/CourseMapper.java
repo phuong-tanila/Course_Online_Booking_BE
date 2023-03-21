@@ -10,8 +10,12 @@ import org.mapstruct.Mapping;
 import java.util.List;
 
 import java.util.List;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(componentModel="spring")
+@Mapper(
+        componentModel="spring",
+        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
+)
 public interface CourseMapper {
 
     @Mapping(target="feedbacks", ignore = true)
@@ -25,6 +29,5 @@ public interface CourseMapper {
 //        courseModel.objective = StringEscapeUtils.escapeHtml4(courseModel.objective);
 //        courseModel.chapters.forEach(c -> c.setChapterName(StringEscapeUtils.escapeHtml4(c.chapterName)));
 //    }
-
     List<CourseModel> toListModel(List<Course> courses);
 }

@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class LoginResponseModel {
+public class TokenAuthModel {
     private String accessToken;
     private String refreshToken;
 

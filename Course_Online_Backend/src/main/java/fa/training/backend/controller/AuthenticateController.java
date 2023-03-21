@@ -1,18 +1,15 @@
 package fa.training.backend.controller;
 
 import fa.training.backend.entities.User;
-import fa.training.backend.exception.DuppicatedUserInfoException;
 import fa.training.backend.helpers.JwtProvider;
 import fa.training.backend.mapper.UserMapper;
 import fa.training.backend.mapper.UserRegisterMapper;
 import fa.training.backend.model.LoginRequestModel;
-import fa.training.backend.model.LoginResponseModel;
+import fa.training.backend.model.TokenAuthModel;
 import fa.training.backend.model.RegisterRequestModel;
-import fa.training.backend.model.UserModel;
 import fa.training.backend.services.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,111 +24,154 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 
 @RestController
 @Slf4j
+@RequestMapping("/auth")
+
 public class AuthenticateController {
-	@Autowired
-	AuthenticationManager authenticationManager;
 
-	@Autowired
-	UserMapper userMapper;
+    @Autowired
+    AuthenticationManager authenticationManager;
 
-	@Autowired
-	UserService userService;
-	@Autowired
-	PasswordEncoder passwordEncoder;
+    @Autowired
+    UserMapper userMapper;
 
-	@Autowired
-	UserRegisterMapper userRegisterMapper;
+    @Autowired
+    UserService userService;
+    @Autowired
+    PasswordEncoder passwordEncoder;
 
-	@RequestMapping(value = { "/", "/welcome" }, method = RequestMethod.GET)
-	public String welcomePage(Model model) {
-		model.addAttribute("title", "Welcome");
-		model.addAttribute("message", "This is welcome page!");
-		return "welcomePage";
-	}
+    @Autowired
+    UserRegisterMapper userRegisterMapper;
 
-	@RequestMapping(value = "/admin", method = RequestMethod.GET)
-	public String adminPage(Model model, Principal principal) {
+    @RequestMapping(value = {"/", "/welcome"}, method = RequestMethod.GET)
+    public String welcomePage(Model model) {
+        model.addAttribute("title", "Welcome");
+        model.addAttribute("message", "This is welcome page!");
+        return "welcomePage";
+    }
 
-		User loginedUser = (User) ((Authentication) principal).getPrincipal();
-		model.addAttribute("userInfo", loginedUser.getUsername());
+    @PostMapping("/login/google")
+    public ResponseEntity<TokenAuthModel> loginByGoogle(@Valid @RequestBody LoginRequestModel loginRequestModel, HttpServletRequest request) {
+        try {
+           
+            UserDetails user = userService.loadUserByUsername(loginRequestModel.email);
+            if(user == null) {
+                throw new Exception();
+            }
+             UsernamePasswordAuthenticationToken
+                            authentication = new UsernamePasswordAuthenticationToken(user, null);
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String accessToken = JwtProvider.generateAccessToken((fa.training.backend.entities.User) authentication.getPrincipal());
+            String refreshToken = JwtProvider.generateRefreshToken((fa.training.backend.entities.User) authentication.getPrincipal());
+            return new ResponseEntity(new TokenAuthModel(accessToken, refreshToken), HttpStatus.OK);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
 
-//		return "adminPage";
-		return  loginedUser.getUsername();
-	}
+        return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+    }
 
+    @PostMapping("/refresh")
+    public ResponseEntity<TokenAuthModel> refreshNewToken(@Valid @RequestBody TokenAuthModel tokenAuthModel) {
+        String refreshToken = tokenAuthModel.getRefreshToken();
+        String accessToken = tokenAuthModel.getAccessToken();
+        JwtProvider.validateAccessToken(accessToken);
+        JwtProvider.validateRefreshToken(refreshToken);
+        String userEmailInRefreshToken = JwtProvider.getUserEmailFromRefreshToken(refreshToken);
+        if (userEmailInRefreshToken.equals(JwtProvider.getUserEmailFromAccessToken(accessToken))) {
+            User user = (User) userService.loadUserByUsername(userEmailInRefreshToken);
+            tokenAuthModel.setAccessToken(JwtProvider.generateAccessToken(user));
+            return new ResponseEntity<TokenAuthModel>(tokenAuthModel, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
 
-	@RequestMapping(value = "/login", method = RequestMethod.POST)
-	public LoginResponseModel login(@Valid @RequestBody LoginRequestModel loginRequestModel) {
+   
 
-		try{
-			Authentication authentication = authenticationManager.authenticate(
-					new UsernamePasswordAuthenticationToken(
-							loginRequestModel.getEmail(),
-							loginRequestModel.getPassword()
-					)
-			);
-			log.error(authentication.toString());
-			log.error(loginRequestModel.toString());
-			SecurityContextHolder.getContext().setAuthentication(authentication);
-			String accessToken = JwtProvider.generateAccessToken((fa.training.backend.entities.User) authentication.getPrincipal());
-			String refreshToken = JwtProvider.generateRefreshToken((fa.training.backend.entities.User) authentication.getPrincipal());
-			return new LoginResponseModel(accessToken, refreshToken);
-		}catch (Exception ex) {
-			ex.printStackTrace();
-		}
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
+    public TokenAuthModel login(@Valid @RequestBody LoginRequestModel loginRequestModel) {
 
-		return new LoginResponseModel();
-	}
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequestModel.getEmail(),
+                            loginRequestModel.getPassword()
+                    )
+            );
+            log.error(authentication.toString());
+            log.error(loginRequestModel.toString());
+//			SecurityContextHolder.getContext().setAuthentication(authentication);
+            String accessToken = JwtProvider.generateAccessToken((fa.training.backend.entities.User) authentication.getPrincipal());
+            String refreshToken = JwtProvider.generateRefreshToken((fa.training.backend.entities.User) authentication.getPrincipal());
+            return new TokenAuthModel(accessToken, refreshToken);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
 
-	@RequestMapping(value = "/logout", method = RequestMethod.POST)
-	public String logout(Model model) {
-		return "13";
-	}
-	@RequestMapping(value = "/register", method = RequestMethod.POST)
-	public ResponseEntity registerNewUser(@RequestBody @Valid RegisterRequestModel registerRequestModel) throws Exception {
-		List<Integer> duplicatedEmailOrPhoneUserId = userService
-														.checkExistUserEmailorPhone(
-																registerRequestModel.email,
-																registerRequestModel.phone
-														);
-		if(duplicatedEmailOrPhoneUserId.isEmpty()){
-			User mappedUser = userRegisterMapper.toEntity(registerRequestModel);
-			mappedUser.setPassword(passwordEncoder.encode(mappedUser.getPassword()));
-			User createdUser = userService.createUser(mappedUser);
-			LoginResponseModel loginResponseModel = login(new LoginRequestModel(createdUser.email, registerRequestModel.password));
-			return new ResponseEntity<LoginResponseModel>(loginResponseModel, new HttpHeaders(), HttpStatus.OK);
-		}else{
-			return new ResponseEntity<>("Email or phone are existed", new HttpHeaders(), HttpStatus.BAD_REQUEST);
-		}
-	}
+        return new TokenAuthModel();
+    }
 
-	@RequestMapping(value = "/user-info/{id}", method = RequestMethod.GET)
-	public String userInfo(@PathVariable(value = "id") int userId) {
+    @RequestMapping(value = "/logout", method = RequestMethod.POST)
+    public String logout(Model model) {
+        return "13";
+    }
 
+    @RequestMapping(value = "/register", method = RequestMethod.POST)
+    public ResponseEntity registerNewUser(@RequestBody @Valid RegisterRequestModel registerRequestModel) throws Exception {
+        List<Integer> duplicatedEmailOrPhoneUserId = userService
+                .checkExistUserEmailorPhone(
+                        registerRequestModel.email,
+                        registerRequestModel.phone
+                );
+        if (duplicatedEmailOrPhoneUserId.isEmpty()) {
+            User mappedUser = userRegisterMapper.toEntity(registerRequestModel);
+            mappedUser.setPassword(passwordEncoder.encode(mappedUser.getPassword()));
+            User createdUser = userService.createUser(mappedUser);
+            TokenAuthModel tokenAuthModel = login(new LoginRequestModel(createdUser.email, registerRequestModel.password));
+            return new ResponseEntity<TokenAuthModel>(tokenAuthModel, new HttpHeaders(), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Email or phone are existed", new HttpHeaders(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @RequestMapping(value = "/user-info/{id}", method = RequestMethod.GET)
+    public String userInfo(@PathVariable(value = "id") int userId) {
 
 //		return "userInfoPage";
-		return "userName: " ;
-	}
+        return "userName: ";
+    }
 
-	@RequestMapping(value = "/403", method = RequestMethod.GET)
-	public String accessDenied(Model model, Principal principal) {
+    @RequestMapping(value = "/403", method = RequestMethod.GET)
+    public String accessDenied(Model model, Principal principal) {
 
-		if (principal != null) {
-			User loginedUser = (User) ((Authentication) principal).getPrincipal();
+        if (principal != null) {
+            User loginedUser = (User) ((Authentication) principal).getPrincipal();
 
-			loginedUser.getUsername();
+            loginedUser.getUsername();
 
-			model.addAttribute("userInfo");
+            model.addAttribute("userInfo");
 
-			String message = "Hi " + principal.getName() //
-					+ "<br> You do not have permission to access this page!";
-			model.addAttribute("message", message);
+            String message = "Hi " + principal.getName() //
+                    + "<br> You do not have permission to access this page!";
+            model.addAttribute("message", message);
 
-		}
+        }
 
-		return "403Page";
-	}
+        return "403Page";
+    }
+     @RequestMapping(value = "/admin", method = RequestMethod.GET)
+    public String adminPage(Model model, Principal principal) {
+
+        User loginedUser = (User) ((Authentication) principal).getPrincipal();
+        model.addAttribute("userInfo", loginedUser.getUsername());
+
+//		return "adminPage";
+        return loginedUser.getUsername();
+    }
 }

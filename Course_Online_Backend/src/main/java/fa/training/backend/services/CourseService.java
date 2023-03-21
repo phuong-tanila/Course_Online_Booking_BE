@@ -44,6 +44,10 @@ public class CourseService {
         }
     }
 
+    
+    public void softDeleteCourse(Course course){
+//        courseRepository.
+    }
     public List<Course> findByCourseName(Integer pageNo, Integer pageSize, HashMap<String, String> orderHashMap, String courseName) {
         Pageable pageable = ServiceHelper.getPageable(pageNo, pageSize, orderHashMap);
         return courseRepository.findByCourseNameIgnoreCaseContaining(courseName, pageable);
@@ -89,17 +93,6 @@ public class CourseService {
         }
     }
 
-    //    public List<Course> getCourseByCategory(Integer pageNo, Integer pageSize, String sortBy, String direction, List<Category> categories) {
-//        Sort sort;
-//        if (direction.equalsIgnoreCase("desc")) {
-//            sort = Sort.by(Sort.Direction.DESC, sortBy);
-//        } else {
-//            sort = Sort.by(Sort.Direction.ASC, sortBy);
-//        }
-//        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
-//        List<Course> courses = courseRepository.findCourseByCategoriesIn(categories, pageable);
-//        return courses;
-//    }
     public List<Course> findCourseByCategory(int categoryId, Pageable pageable) {
         List<Course> courses = courseRepository.findCoursesByCategory(categoryId, pageable);
         return courses;
@@ -112,5 +105,12 @@ public class CourseService {
 //	public List<Course> sortByRating
     public int totalCourseByCate(int categoryId){
         return courseRepository.countAllCourses(categoryId);
+    }
+
+    public Course createCourseOrUpdate(Course course){
+        return courseRepository.save(course);
+    }
+    public void deleteCourse(int courseId){
+        courseRepository.deleteById(courseId);
     }
 }
