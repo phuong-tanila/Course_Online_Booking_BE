@@ -36,15 +36,12 @@ import org.springframework.data.domain.Sort.Order;
 @RequestMapping("/courses")
 //@RequestMapping(path="/JSON", produces="application/json")
 public class CourseController {
-
 	@Autowired
 	public CourseService courseService;
 	@Autowired
 	public CategoryService categoryService;
-
     @Autowired
     public FeedbackService feedbackService;
-
 	@Autowired
 	private CourseMapper courseMapper;
     @Autowired
@@ -198,7 +195,7 @@ public class CourseController {
             @RequestParam(defaultValue = "id,desc") String[] sort) {
         try {
             Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortOrder.getSortOrder(sort)));
-            List<Course> courses = courseService.getCoursesByCategory(pageable);
+            List<Course> courses = courseService.getCoursesPagination(pageable);
             List<CourseModel> result = courseMapper.toListModel(courses);
             if (result.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);

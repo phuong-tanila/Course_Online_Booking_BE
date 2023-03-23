@@ -34,7 +34,6 @@ public class User implements Serializable, UserDetails {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column
 	public int id;
-	
 	@Column
 	public String password;
 	@Column(length = Integer.MAX_VALUE)

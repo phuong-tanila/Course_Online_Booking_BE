@@ -67,7 +67,6 @@ public class CategoryController {
             return -1;
         }
     }
-
     @GetMapping("")
     public ResponseEntity<List<CourseModel>> getAllCourses(
             @RequestParam(defaultValue = "0") Integer pageNo,
