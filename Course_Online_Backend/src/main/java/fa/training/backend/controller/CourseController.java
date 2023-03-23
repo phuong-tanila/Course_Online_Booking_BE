@@ -28,14 +28,17 @@ import fa.training.backend.entities.User;
 import fa.training.backend.model.ExceptionResponse;
 import fa.training.backend.services.CategoryService;
 import fa.training.backend.services.CourseService;
+
 import java.security.Principal;
 
 import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
+
 import org.springframework.security.core.Authentication;
 
 @RestController
 @Slf4j
+@CrossOrigin
 @RequestMapping("/courses")
 //@RequestMapping(path="/JSON", produces="application/json")
 public class CourseController {
@@ -111,8 +114,8 @@ public class CourseController {
         }
 
     }
-    
-    
+
+
     @DeleteMapping("/{id}")
     @RolesAllowed("AD")
     ResponseEntity deleteCourse(@Valid @PathVariable("id") int courseId) {
@@ -187,6 +190,17 @@ public class CourseController {
         }
     }
 
+    @GetMapping("/total-course-search")
+    public int totalCourseByName(
+            @RequestParam() String name
+    ) {
+        try {
+            return courseService.totalCourseByName(name);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
 
 //    @GetMapping("/list")
 //    public ResponseEntity<List<CourseModel>> getAllCourses(
@@ -228,6 +242,7 @@ public class CourseController {
 //		List<Course> list= courseService.findCourseByCategory(category);
 //		return list;
 //	}
+
     /**
      * @apiNote wait for checking naming conventions
      */
@@ -276,36 +291,39 @@ public class CourseController {
     public ResponseEntity<List<CourseModel>> searchCourses(
             @RequestParam String name,
             @RequestParam(defaultValue = "0") Integer pageNo,
-            @RequestParam(defaultValue = "5") Integer pageSize,
+            @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(defaultValue = "id,desc") String[] sort) {
-        try {
-            Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortOrder.getSortOrder(sort)));
-            List<Course> courses = courseService.searchCoursesByName(name, pageable);
-            List<CourseModel> result = courseMapper.toListModel(courses);
-            if (result.isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        if (!name.trim().isEmpty()) {
+            try {
+                Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortOrder.getSortOrder(sort)));
+                List<Course> courses = courseService.searchCoursesByName(name, pageable);
+                List<CourseModel> result = courseMapper.toListModel(courses);
+                if (result.isEmpty()) {
+                    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+                }
+                return new ResponseEntity<>(result, HttpStatus.OK);
+            } catch (Exception e) {
+                return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
             }
-            return new ResponseEntity<>(result, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+        return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @GetMapping("/b")
-    public ResponseEntity<List<CourseModel>> test(
-            @RequestParam(defaultValue = "0") Integer pageNo,
-            @RequestParam(defaultValue = "20") Integer pageSize,
-            @RequestParam(defaultValue = "id,desc") String[] sort) {
-        try {
-            Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortOrder.getSortOrder(sort)));
-            List<Course> courses = courseService.getCoursesByCategory(pageable);
-            List<CourseModel> result = courseMapper.toListModel(courses);
-            if (result.isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        @GetMapping("/b")
+        public ResponseEntity<List<CourseModel>> test (
+                @RequestParam(defaultValue = "0") Integer pageNo,
+                @RequestParam(defaultValue = "20") Integer pageSize,
+                @RequestParam(defaultValue = "id,desc") String[]sort){
+            try {
+                Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortOrder.getSortOrder(sort)));
+                List<Course> courses = courseService.getCoursesByCategory(pageable);
+                List<CourseModel> result = courseMapper.toListModel(courses);
+                if (result.isEmpty()) {
+                    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+                }
+                return new ResponseEntity<>(result, HttpStatus.OK);
+            } catch (Exception e) {
+                return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
             }
-            return new ResponseEntity<>(result, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-}

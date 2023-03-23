@@ -117,6 +117,9 @@ public class CourseService {
         return courseRepository.countAllCourse();
     }
 
+    public int totalCourseByName(String name) {
+        return courseRepository.countCourseByName(name, new Date());
+    }
     public Course createCourseOrUpdate(Course course){
         return courseRepository.save(course);
     }

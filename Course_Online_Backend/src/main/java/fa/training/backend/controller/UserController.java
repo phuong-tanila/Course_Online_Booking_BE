@@ -10,6 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/user")
 public class UserController {
@@ -42,12 +45,40 @@ public class UserController {
     }
 
     @GetMapping("/teacher/{id}")
-    public ResponseEntity<UserModel> getUserById(
+    public ResponseEntity<UserModel> getTeacherById(
             @PathVariable("id") int id,
             @RequestParam(defaultValue = "TC") String role
     ) {
         User user = (User) userService.findUserById(id, role);
         UserModel userModel = userMapper.toModel(user);
         return new ResponseEntity<UserModel>(userModel, new HttpHeaders(), HttpStatus.OK);
+    }
+
+    /*Show list all user*/
+//    @GetMapping("/list-student")
+//    public ResponseEntity<List<User>> getListUser() {
+//        return ResponseEntity.ok(userService.findAllUser());
+//    }
+
+    /*Show user theo id*/
+    @GetMapping("/student/{id}")
+    public ResponseEntity<UserModel> getUserById(@PathVariable("id") int id, @RequestParam(defaultValue = "US") String role) {
+        User user = userService.findUserById(id, role);
+        UserModel userModel = userMapper.toModel(user);
+        return new ResponseEntity<UserModel>(userModel, new HttpHeaders(), HttpStatus.OK);
+    }
+
+    @PutMapping(value = "/update-student/{id}")
+    public ResponseEntity<User> edit(@PathVariable("id") int id, @RequestParam(defaultValue = "US") String role, @RequestBody User u) {
+        Optional<User> optionalUpdatedUser = Optional.ofNullable(userService.findUserById(id, role));
+        User updatedUser = optionalUpdatedUser.get();
+
+        updatedUser.setFullname(u.getFullname());
+        updatedUser.setPhone(u.getPhone());
+        updatedUser.setEmail(u.getEmail());
+        updatedUser.setAvatar(u.getAvatar());
+        updatedUser.setDescription(u.getDescription());
+
+        return ResponseEntity.ok(userService.saveUser(updatedUser));
     }
 }
