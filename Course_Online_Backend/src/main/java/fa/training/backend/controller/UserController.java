@@ -1,6 +1,9 @@
 package fa.training.backend.controller;
 
 import fa.training.backend.entities.User;
+
+import fa.training.backend.exception.RecordNotFoundException;
+
 import fa.training.backend.mapper.UserMapper;
 import fa.training.backend.model.UserModel;
 import fa.training.backend.services.UserService;
@@ -10,13 +13,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
 import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/user")
 public class UserController {
     @Autowired
+
     private UserService userService;
     @Autowired
     public UserMapper userMapper;
@@ -80,5 +87,6 @@ public class UserController {
         updatedUser.setDescription(u.getDescription());
 
         return ResponseEntity.ok(userService.saveUser(updatedUser));
+
     }
 }

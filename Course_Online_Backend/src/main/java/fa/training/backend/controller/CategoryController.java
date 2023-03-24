@@ -69,15 +69,16 @@ public class CategoryController {
         }
     }
 
-//    @GetMapping("")
-//    public ResponseEntity<List<CourseModel>> getAllCourses(
-//            @RequestParam(defaultValue = "0") Integer pageNo,
-//            @RequestParam(defaultValue = "5") Integer pageSize,
-//            @RequestParam(defaultValue = "id") String sortBy) {
-//        List<Course> listCourses = courseService.getAllCourses(pageNo, pageSize, sortBy);
-//        List<CourseModel> result = courseMapper.toListModel(listCourses);
-//        return new ResponseEntity<List<CourseModel>>(result, new HttpHeaders(), HttpStatus.OK);
-//    }
+    @GetMapping("")
+    public ResponseEntity<List<CourseModel>> getAllCourses(
+            @RequestParam(defaultValue = "0") Integer pageNo,
+            @RequestParam(defaultValue = "5") Integer pageSize,
+            @RequestParam(defaultValue = "id") String sortBy) {
+        List<Course> listCourses = courseService.getAllCourses(pageNo, pageSize, sortBy);
+        List<CourseModel> result = courseMapper.toListModel(listCourses);
+        return new ResponseEntity<List<CourseModel>>(result, new HttpHeaders(), HttpStatus.OK);
+    }
+
 
     @GetMapping("/")
     public ResponseEntity<List<CategoryModel>> getAllCategory(){

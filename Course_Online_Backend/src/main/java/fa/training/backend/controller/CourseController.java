@@ -43,6 +43,7 @@ import org.springframework.security.core.Authentication;
 //@RequestMapping(path="/JSON", produces="application/json")
 public class CourseController {
 
+
     @Autowired
     public CourseService courseService;
     @Autowired
@@ -53,6 +54,7 @@ public class CourseController {
 
     @Autowired
     private CourseMapper courseMapper;
+
     @Autowired
     public CategoryMapper categoryMapper;
     @Autowired

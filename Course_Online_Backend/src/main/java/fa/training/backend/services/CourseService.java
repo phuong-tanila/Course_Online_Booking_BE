@@ -20,8 +20,12 @@ import fa.training.backend.repositories.CourseRepository;
 public class CourseService {
     @Autowired
     CourseRepository courseRepository;
-
-    public List<Course> findAll(Sort sort) {
+    @Autowired
+    FeedbackService feedbackService;
+    public List<Course> findAll() {
+        return courseRepository.findAll();
+    }
+    public List<Course> findAllSort(Sort sort) {
         return courseRepository.findAll(sort);
     }
 
@@ -40,7 +44,7 @@ public class CourseService {
         }
     }
 
-    public List<Course> getCoursesByCategory(Pageable pageable) {
+    public List<Course> getCoursesPagination(Pageable pageable) {
         Page<Course> pagedResult = courseRepository.findAll(pageable);
         if (pagedResult.hasContent()) {
             return pagedResult.getContent();
@@ -58,14 +62,6 @@ public class CourseService {
         return courseRepository.findByCourseNameIgnoreCaseContaining(courseName, pageable);
     }
 
-    //	public Course findById(int id) throws RecordNotFoundException {
-//		Optional<Course> course = courseRepository.findById(id);
-//		if (course.isPresent()) {
-//			return course.get();
-//		} else {
-//			throw new RecordNotFoundException("No course exist for given id");
-//		}
-//	}
     public Course findById(int id) throws RecordNotFoundException {
         Optional<Course> course = courseRepository.findById(id);
         if (course.isPresent()) {
@@ -113,6 +109,7 @@ public class CourseService {
         return courses;
     }
 
+
     //	public List<Course> sortByRating
     public int totalCourseByCate(int categoryId) {
         return courseRepository.countAllCoursesByCate(categoryId);
@@ -130,5 +127,16 @@ public class CourseService {
     }
     public void deleteCourse(int courseId){
         courseRepository.deleteById(courseId);
+
+    public int totalCourseByCate(int categoryId){
+        return courseRepository.countAllCourses(categoryId);
+
+    }
+
+    public List<Course> getCoursesByCategoryId(int id) {
+        return courseRepository.findCoursesByCategoriesId(id);
+    }
+    public List<Course> getCoursesByTeacherId(int id){
+        return courseRepository.findCoursesByTeacherId(id);
     }
 }
