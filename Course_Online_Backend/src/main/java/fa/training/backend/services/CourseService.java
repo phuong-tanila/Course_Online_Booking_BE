@@ -26,7 +26,12 @@ public class CourseService {
     }
 
     public List<Course> getAllCourses(Integer pageNo, Integer pageSize, String sortBy) {
-        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
+        Pageable pageable;
+        if(sortBy.equals("tuitionFee")){
+            pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
+        }else{
+            pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
+        }
         Page<Course> pagedResult = courseRepository.findAll(pageable);
         if (pagedResult.hasContent()) {
             return pagedResult.getContent();
