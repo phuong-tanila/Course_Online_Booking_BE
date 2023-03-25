@@ -1,7 +1,7 @@
 package fa.training.backend.filters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fa.training.backend.helpers.JwtProvider;
+import fa.training.backend.helpers.jwt.JwtProvider;
 import fa.training.backend.model.ExceptionResponse;
 import fa.training.backend.services.UserService;
 import io.jsonwebtoken.ExpiredJwtException;

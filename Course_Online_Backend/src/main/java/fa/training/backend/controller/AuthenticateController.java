@@ -1,13 +1,16 @@
 package fa.training.backend.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import fa.training.backend.entities.User;
-import fa.training.backend.helpers.JwtProvider;
+import fa.training.backend.helpers.jwt.JwtProvider;
 import fa.training.backend.mapper.UserMapper;
 import fa.training.backend.mapper.UserRegisterMapper;
 import fa.training.backend.model.LoginRequestModel;
 import fa.training.backend.model.TokenAuthModel;
 import fa.training.backend.model.RegisterRequestModel;
 import fa.training.backend.services.UserService;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -31,7 +34,6 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 @RestController
 @Slf4j
 @RequestMapping("/auth")
-
 public class AuthenticateController {
 
     @Autowired
@@ -48,24 +50,17 @@ public class AuthenticateController {
     @Autowired
     UserRegisterMapper userRegisterMapper;
 
-    @RequestMapping(value = {"/", "/welcome"}, method = RequestMethod.GET)
-    public String welcomePage(Model model) {
-        model.addAttribute("title", "Welcome");
-        model.addAttribute("message", "This is welcome page!");
-        return "welcomePage";
-    }
 
     @PostMapping("/login/google")
     public ResponseEntity<TokenAuthModel> loginByGoogle(@Valid @RequestBody LoginRequestModel loginRequestModel, HttpServletRequest request) {
         try {
-           
+
             UserDetails user = userService.loadUserByUsername(loginRequestModel.email);
-            if(user == null) {
+            if (user == null) {
                 throw new Exception();
             }
-             UsernamePasswordAuthenticationToken
-                            authentication = new UsernamePasswordAuthenticationToken(user, null);
-                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user, null);
+            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String accessToken = JwtProvider.generateAccessToken((fa.training.backend.entities.User) authentication.getPrincipal());
             String refreshToken = JwtProvider.generateRefreshToken((fa.training.backend.entities.User) authentication.getPrincipal());
@@ -78,21 +73,25 @@ public class AuthenticateController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<TokenAuthModel> refreshNewToken(@Valid @RequestBody TokenAuthModel tokenAuthModel) {
+    public ResponseEntity<TokenAuthModel> refreshNewToken(@Valid @RequestBody TokenAuthModel tokenAuthModel) throws JsonProcessingException {
         String refreshToken = tokenAuthModel.getRefreshToken();
         String accessToken = tokenAuthModel.getAccessToken();
-        JwtProvider.validateAccessToken(accessToken);
-        JwtProvider.validateRefreshToken(refreshToken);
-        String userEmailInRefreshToken = JwtProvider.getUserEmailFromRefreshToken(refreshToken);
-        if (userEmailInRefreshToken.equals(JwtProvider.getUserEmailFromAccessToken(accessToken))) {
-            User user = (User) userService.loadUserByUsername(userEmailInRefreshToken);
-            tokenAuthModel.setAccessToken(JwtProvider.generateAccessToken(user));
-            return new ResponseEntity<TokenAuthModel>(tokenAuthModel, HttpStatus.OK);
+        try {
+            JwtProvider.validateAccessToken(accessToken);
+            JwtProvider.validateRefreshToken(refreshToken);
+
+        } catch (Exception ex) {
+            String userEmailInRefreshToken = JwtProvider.getUserEmailFromJWT(refreshToken);
+            if (userEmailInRefreshToken.equals(JwtProvider.getUserEmailFromJWT(accessToken))) {
+                User user = (User) userService.loadUserByUsername(userEmailInRefreshToken);
+                tokenAuthModel.setAccessToken(JwtProvider.generateAccessToken(user));
+                System.out.println(tokenAuthModel);
+                return new ResponseEntity<TokenAuthModel>(tokenAuthModel, HttpStatus.OK);
+            }
         }
+
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
-
-   
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public TokenAuthModel login(@Valid @RequestBody LoginRequestModel loginRequestModel) {
@@ -165,7 +164,8 @@ public class AuthenticateController {
 
         return "403Page";
     }
-     @RequestMapping(value = "/admin", method = RequestMethod.GET)
+
+    @RequestMapping(value = "/admin", method = RequestMethod.GET)
     public String adminPage(Model model, Principal principal) {
 
         User loginedUser = (User) ((Authentication) principal).getPrincipal();
