@@ -21,6 +21,10 @@ public class OrderService {
         List<Order> orders = orderRepository.getAllOrderByUserId(userId, pageable);
         return orders;
     }
+    
+    public Order saveOrder(Order order){
+        return orderRepository.save(order);
+    }
 //    public List<Order> findAll() {
 //        List<Order> orders = orderRepository.findAll();
 //        System.err.println(orders);
