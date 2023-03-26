@@ -19,7 +19,6 @@ public class OrderService {
     OrderRepository orderRepository;
     public List<Order> getCoursesByUserId(int userId, Pageable pageable) {
         List<Order> orders = orderRepository.getAllOrderByUserId(userId, pageable);
-        System.err.println(orders);
         return orders;
     }
 //    public List<Order> findAll() {
