@@ -10,15 +10,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @RestController
+@CrossOrigin
+@RequestMapping("/feedback")
 public class FeedbackController {
     @Autowired
     private FeedbackMapper feedbackMapper;
@@ -39,4 +38,14 @@ public class FeedbackController {
 //        feedbacks.forEach(f -> feedbackModels.add(mapStructConverter.toModel(f)));
 //        return new ResponseEntity<List<FeedbackModel>>(feedbackModels, new HttpHeaders(), HttpStatus.OK);
 //    }
+
+    @GetMapping("/rating-star")
+    public List<Integer> totalStar(){
+        List<Integer> totalEachRating = new ArrayList<Integer>();
+        for (int i = 1; i <= 5; i++) {
+            int result = feedbackService.countStar(i);
+            totalEachRating.add(result);
+        }
+        return totalEachRating;
+    }
 }

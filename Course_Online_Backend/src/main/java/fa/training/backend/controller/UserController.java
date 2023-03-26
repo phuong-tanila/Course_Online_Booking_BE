@@ -11,25 +11,25 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.Optional;
+import java.util.List;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/user")
 public class UserController {
     @Autowired
     private UserService userService;
     @Autowired
     public UserMapper userMapper;
-//	@GetMapping("/list-user")
-//	public List<UserModel> getListUser() {
-//		List<UserModel> modelList = new ArrayList<>();
-//		List<User> userList = userService.findAllUser();
-//		for (User u : userList) {
-//			UserModel userModel = mapStructConverter.sourceToDestination(u);
-//			modelList.add(userModel);
-//		}
-//		return modelList;
-//	}
+	@GetMapping("/list-user")
+	public ResponseEntity<List<UserModel>> getListUser() {
+		List<UserModel> result = new ArrayList<>();
+		List<User> listUser = userService.findAllUser();
+        listUser.forEach(u -> result.add(userMapper.toModel(u)));
+        return new ResponseEntity<List<UserModel>>(result, new HttpHeaders(), HttpStatus.OK);
+	}
 
     //	Get user profile
     @GetMapping("/profile/{searchKey}")
@@ -72,13 +72,21 @@ public class UserController {
     public ResponseEntity<User> edit(@PathVariable("id") int id, @RequestParam(defaultValue = "US") String role, @RequestBody User u) {
         Optional<User> optionalUpdatedUser = Optional.ofNullable(userService.findUserById(id, role));
         User updatedUser = optionalUpdatedUser.get();
-
         updatedUser.setFullname(u.getFullname());
         updatedUser.setPhone(u.getPhone());
         updatedUser.setEmail(u.getEmail());
         updatedUser.setAvatar(u.getAvatar());
         updatedUser.setDescription(u.getDescription());
-
         return ResponseEntity.ok(userService.saveUser(updatedUser));
+    }
+
+    @GetMapping("/count-teacher")
+    public List<Integer> totalTeacherByCategory() {
+        try {
+            return userService.countTeacherEachCategory();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 }

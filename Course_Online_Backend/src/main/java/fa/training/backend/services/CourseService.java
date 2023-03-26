@@ -131,4 +131,9 @@ public class CourseService {
     public void deleteCourse(int courseId){
         courseRepository.deleteById(courseId);
     }
+
+    public List<Integer> getQuantityCourses(){
+        return courseRepository.getQuantityCoursesByCategory();
+    }
+
 }

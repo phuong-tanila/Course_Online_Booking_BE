@@ -58,4 +58,8 @@ public class UserService implements UserDetailsService {
 	public User saveUser(User updatedUser) {
 		return userRepository.save(updatedUser);
 	}
+
+	public List<Integer> countTeacherEachCategory(){
+		return userRepository.countTeachersEachCategory();
+	};
 }

@@ -34,4 +34,8 @@ public class FeedbackService {
 		return feedbackRepository.save(f);
 	}
 
+	public int countStar(int star){
+		return feedbackRepository.countStarRating(star);
+	}
+
 }

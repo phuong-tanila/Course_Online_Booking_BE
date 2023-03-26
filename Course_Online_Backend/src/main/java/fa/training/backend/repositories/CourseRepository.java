@@ -42,6 +42,9 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
 
     @Query("select count(c.id) from Course c JOIN c.categories ct WHERE ct.id = ?1")
     public int countAllCoursesByCate(int categoryId);
+
+    @Query("select count(c.id) from Course c JOIN c.categories ct GROUP BY ct.id")
+    public List<Integer> getQuantityCoursesByCategory();
     @Query("select count(c.id) from Course c")
     public int countAllCourse();
     @Query("SELECT c FROM Course c WHERE c.courseName LIKE %?1% AND c.createDate < ?2")
