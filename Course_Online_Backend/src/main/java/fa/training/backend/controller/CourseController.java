@@ -309,21 +309,43 @@ public class CourseController {
         return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-        @GetMapping("/b")
-        public ResponseEntity<List<CourseModel>> test (
-                @RequestParam(defaultValue = "0") Integer pageNo,
-                @RequestParam(defaultValue = "20") Integer pageSize,
-                @RequestParam(defaultValue = "id,desc") String[]sort){
-            try {
-                Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortOrder.getSortOrder(sort)));
-                List<Course> courses = courseService.getCoursesByCategory(pageable);
-                List<CourseModel> result = courseMapper.toListModel(courses);
-                if (result.isEmpty()) {
-                    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-                }
-                return new ResponseEntity<>(result, HttpStatus.OK);
-            } catch (Exception e) {
-                return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+    @GetMapping("/b")
+    public ResponseEntity<List<CourseModel>> test(
+            @RequestParam(defaultValue = "0") Integer pageNo,
+            @RequestParam(defaultValue = "20") Integer pageSize,
+            @RequestParam(defaultValue = "id,desc") String[] sort) {
+        try {
+            Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortOrder.getSortOrder(sort)));
+            List<Course> courses = courseService.getCoursesByCategory(pageable);
+            List<CourseModel> result = courseMapper.toListModel(courses);
+            if (result.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @PutMapping("/c")
+    public ResponseEntity<CourseModel> test2(@RequestBody Course course) {
+        try {
+//            Course c = courseService.findById(181);
+            Course c = courseService.createCourseOrUpdate(course);
+            CourseModel result = courseMapper.toModel(c);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    @PatchMapping("/d/")
+    public ResponseEntity<CourseModel> test3(@RequestBody Course course) {
+        try {
+            Course c = courseService.createCourseOrUpdate(course);
+            CourseModel result = courseMapper.toModel(c);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+}

@@ -28,7 +28,7 @@ public class OrderController {
     @GetMapping("/{userId}")
     public ResponseEntity<List<OrderModel>> getCourseByCategory(@PathVariable("userId") int userId,
                                                                 @RequestParam(defaultValue = "0") Integer pageNo,
-                                                                @RequestParam(defaultValue = "20") Integer pageSize,
+                                                                @RequestParam(defaultValue = "5") Integer pageSize,
                                                                 @RequestParam(defaultValue = "buyDate,desc") String[] sort
     ) {
         try {
