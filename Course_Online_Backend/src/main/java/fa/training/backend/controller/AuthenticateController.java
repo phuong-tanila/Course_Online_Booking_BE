@@ -28,6 +28,7 @@ import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 
@@ -121,21 +122,20 @@ public class AuthenticateController {
         return "13";
     }
 
-    @RequestMapping(value = "/register", method = RequestMethod.POST)
+    @PostMapping("/register")
     public ResponseEntity registerNewUser(@RequestBody @Valid RegisterRequestModel registerRequestModel) throws Exception {
         List<Integer> duplicatedEmailOrPhoneUserId = userService
-                .checkExistUserEmailorPhone(
-                        registerRequestModel.email,
-                        registerRequestModel.phone
-                );
+                .checkExistUserEmailorPhone(registerRequestModel.email,
+                        registerRequestModel.phone);
         if (duplicatedEmailOrPhoneUserId.isEmpty()) {
             User mappedUser = userRegisterMapper.toEntity(registerRequestModel);
             mappedUser.setPassword(passwordEncoder.encode(mappedUser.getPassword()));
+            mappedUser.setRole("US");
             User createdUser = userService.createUser(mappedUser);
             TokenAuthModel tokenAuthModel = login(new LoginRequestModel(createdUser.email, registerRequestModel.password));
-            return new ResponseEntity<TokenAuthModel>(tokenAuthModel, new HttpHeaders(), HttpStatus.OK);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            return new ResponseEntity<>("Email or phone are existed", new HttpHeaders(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Email or phone number already exists", new HttpHeaders(), HttpStatus.BAD_REQUEST);
         }
     }
 
