@@ -59,7 +59,15 @@ public class UserController {
 //    public ResponseEntity<List<User>> getListUser() {
 //        return ResponseEntity.ok(userService.findAllUser());
 //    }
-
+    @GetMapping("/list-teacher")
+    public ResponseEntity<List<UserModel>> getListTeacher(
+            @RequestParam(defaultValue = "TC") String role
+    ) {
+        List<UserModel> result = new ArrayList<>();
+        List<User> listUser = userService.findListTeacher(role);
+        listUser.forEach(u -> result.add(userMapper.toModel(u)));
+        return new ResponseEntity<List<UserModel>>(result, new HttpHeaders(), HttpStatus.OK);
+    }
     /*Show user theo id*/
     @GetMapping("/student/{id}")
     public ResponseEntity<UserModel> getUserById(@PathVariable("id") int id, @RequestParam(defaultValue = "US") String role) {

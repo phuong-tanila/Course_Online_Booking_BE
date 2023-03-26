@@ -27,4 +27,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
 	@Query("select count(DISTINCT (c.teacher)) from Course c join c.categories cc group by cc.id")
 	public List<Integer> countTeachersEachCategory();
+	@Query("select u from User u where u.role = :role")
+	List<User> findListTeacher(String role);
 }
