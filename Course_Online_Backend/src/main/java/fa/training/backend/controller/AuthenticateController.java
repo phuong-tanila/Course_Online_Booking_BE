@@ -62,13 +62,14 @@ public class AuthenticateController {
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user, null);
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            System.out.println((fa.training.backend.entities.User) authentication.getPrincipal());
             String accessToken = JwtProvider.generateAccessToken((fa.training.backend.entities.User) authentication.getPrincipal());
             String refreshToken = JwtProvider.generateRefreshToken((fa.training.backend.entities.User) authentication.getPrincipal());
             return new ResponseEntity(new TokenAuthModel(accessToken, refreshToken), HttpStatus.OK);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-
+        
         return new ResponseEntity(HttpStatus.UNAUTHORIZED);
     }
 
@@ -82,6 +83,8 @@ public class AuthenticateController {
 
         } catch (Exception ex) {
             String userEmailInRefreshToken = JwtProvider.getUserEmailFromJWT(refreshToken);
+            System.out.println(userEmailInRefreshToken);
+            System.out.println(JwtProvider.getUserEmailFromJWT(accessToken));
             if (userEmailInRefreshToken.equals(JwtProvider.getUserEmailFromJWT(accessToken))) {
                 User user = (User) userService.loadUserByUsername(userEmailInRefreshToken);
                 tokenAuthModel.setAccessToken(JwtProvider.generateAccessToken(user));
