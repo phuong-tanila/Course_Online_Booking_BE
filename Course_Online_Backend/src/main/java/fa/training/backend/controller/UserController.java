@@ -73,14 +73,22 @@ public class UserController {
 //        return ResponseEntity.ok(userService.findAllUser());
 //    }
     /*Show user theo id*/
-    @GetMapping("/student/{id}")
-    public ResponseEntity<UserModel> getUserById(@PathVariable("id") int id, @RequestParam(defaultValue = "US") String role) {
+
+    @GetMapping("/{id}/{role}")
+    public ResponseEntity<UserModel> getUserById(@PathVariable("id") int id, @PathVariable String role) {
         User user = userService.findUserById(id, role);
         UserModel userModel = userMapper.toModel(user);
         return new ResponseEntity<UserModel>(userModel, new HttpHeaders(), HttpStatus.OK);
     }
 
-    @PostMapping("/update-profile")
+    @GetMapping("/student/{id}")
+    public ResponseEntity<UserModel> getStudentById(@PathVariable("id") int id, @RequestParam(defaultValue = "US") String role) {
+        User user = userService.findUserById(id, role);
+        UserModel userModel = userMapper.toModel(user);
+        return new ResponseEntity<UserModel>(userModel, new HttpHeaders(), HttpStatus.OK);
+    }
+
+    @PutMapping("/update-profile")
     public ResponseEntity updateProfile(@Valid @RequestBody User user, Principal principal) {
         User updateUser = (User) ((Authentication) principal).getPrincipal();
         updateUser.setEmail(user.getEmail());
