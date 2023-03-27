@@ -1,9 +1,7 @@
 package fa.training.backend.controller;
 
-import fa.training.backend.entities.Course;
 import fa.training.backend.entities.User;
 import fa.training.backend.mapper.UserMapper;
-import fa.training.backend.model.CourseModel;
 import fa.training.backend.model.UserModel;
 import fa.training.backend.services.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -17,8 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.security.Principal;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Optional;
 import java.util.List;
 
 @RestController
