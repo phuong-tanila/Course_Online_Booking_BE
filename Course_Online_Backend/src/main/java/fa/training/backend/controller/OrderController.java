@@ -61,7 +61,7 @@ public class OrderController {
         }
     }
     @RolesAllowed("US")
-    @PostMapping("/check-out")
+    @PostMapping("/checkout")
     public ResponseEntity checkOut(
             Principal principal,
             @RequestBody List<Integer> courseIds,
@@ -71,6 +71,7 @@ public class OrderController {
             @RequestParam(defaultValue = "cod") String paymentMethod
     ){
         User currentUser = (User) ((Authentication) principal).getPrincipal();
+        System.out.println(currentUser);
         Order order = new Order();
         order.setCoupon(coupon);
         order.setPaymentId(paymentId);

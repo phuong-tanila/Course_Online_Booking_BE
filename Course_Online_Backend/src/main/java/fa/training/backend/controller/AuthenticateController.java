@@ -28,6 +28,7 @@ import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 
@@ -62,13 +63,14 @@ public class AuthenticateController {
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user, null);
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            System.out.println((fa.training.backend.entities.User) authentication.getPrincipal());
             String accessToken = JwtProvider.generateAccessToken((fa.training.backend.entities.User) authentication.getPrincipal());
             String refreshToken = JwtProvider.generateRefreshToken((fa.training.backend.entities.User) authentication.getPrincipal());
             return new ResponseEntity(new TokenAuthModel(accessToken, refreshToken), HttpStatus.OK);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-
+        
         return new ResponseEntity(HttpStatus.UNAUTHORIZED);
     }
 
@@ -82,6 +84,8 @@ public class AuthenticateController {
 
         } catch (Exception ex) {
             String userEmailInRefreshToken = JwtProvider.getUserEmailFromJWT(refreshToken);
+            System.out.println(userEmailInRefreshToken);
+            System.out.println(JwtProvider.getUserEmailFromJWT(accessToken));
             if (userEmailInRefreshToken.equals(JwtProvider.getUserEmailFromJWT(accessToken))) {
                 User user = (User) userService.loadUserByUsername(userEmailInRefreshToken);
                 tokenAuthModel.setAccessToken(JwtProvider.generateAccessToken(user));
@@ -121,21 +125,20 @@ public class AuthenticateController {
         return "13";
     }
 
-    @RequestMapping(value = "/register", method = RequestMethod.POST)
+    @PostMapping("/register")
     public ResponseEntity registerNewUser(@RequestBody @Valid RegisterRequestModel registerRequestModel) throws Exception {
         List<Integer> duplicatedEmailOrPhoneUserId = userService
-                .checkExistUserEmailorPhone(
-                        registerRequestModel.email,
-                        registerRequestModel.phone
-                );
+                .checkExistUserEmailorPhone(registerRequestModel.email,
+                        registerRequestModel.phone);
         if (duplicatedEmailOrPhoneUserId.isEmpty()) {
             User mappedUser = userRegisterMapper.toEntity(registerRequestModel);
             mappedUser.setPassword(passwordEncoder.encode(mappedUser.getPassword()));
+            mappedUser.setRole("US");
             User createdUser = userService.createUser(mappedUser);
             TokenAuthModel tokenAuthModel = login(new LoginRequestModel(createdUser.email, registerRequestModel.password));
-            return new ResponseEntity<TokenAuthModel>(tokenAuthModel, new HttpHeaders(), HttpStatus.OK);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            return new ResponseEntity<>("Email or phone are existed", new HttpHeaders(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Email or phone number already exists", new HttpHeaders(), HttpStatus.BAD_REQUEST);
         }
     }
 
