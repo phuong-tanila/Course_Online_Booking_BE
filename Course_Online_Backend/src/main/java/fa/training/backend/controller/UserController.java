@@ -1,21 +1,28 @@
 package fa.training.backend.controller;
 
+import fa.training.backend.entities.Course;
 import fa.training.backend.entities.User;
 import fa.training.backend.mapper.UserMapper;
+import fa.training.backend.model.CourseModel;
 import fa.training.backend.model.UserModel;
 import fa.training.backend.services.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Optional;
 import java.util.List;
 
 @RestController
+@Slf4j
 @CrossOrigin
 @RequestMapping("/user")
 public class UserController {
@@ -54,6 +61,16 @@ public class UserController {
         return new ResponseEntity<UserModel>(userModel, new HttpHeaders(), HttpStatus.OK);
     }
 
+    @GetMapping("/list-teacher")
+    public ResponseEntity<List<UserModel>> getListTeacher(
+            @RequestParam(defaultValue = "TC") String role
+    ) {
+        List<UserModel> result = new ArrayList<>();
+        List<User> listUser = userService.findListTeacher(role);
+        listUser.forEach(u -> result.add(userMapper.toModel(u)));
+        return new ResponseEntity<List<UserModel>>(result, new HttpHeaders(), HttpStatus.OK);
+    }
+
     /*Show list all user*/
 //    @GetMapping("/list-student")
 //    public ResponseEntity<List<User>> getListUser() {
@@ -76,17 +93,27 @@ public class UserController {
         return new ResponseEntity<UserModel>(userModel, new HttpHeaders(), HttpStatus.OK);
     }
 
-    @PutMapping(value = "/update-student/{id}")
-    public ResponseEntity<User> edit(@PathVariable("id") int id, @RequestParam(defaultValue = "US") String role, @RequestBody User u) {
-        Optional<User> optionalUpdatedUser = Optional.ofNullable(userService.findUserById(id, role));
-        User updatedUser = optionalUpdatedUser.get();
-        updatedUser.setFullname(u.getFullname());
-        updatedUser.setPhone(u.getPhone());
-        updatedUser.setEmail(u.getEmail());
-        updatedUser.setAvatar(u.getAvatar());
-        updatedUser.setDescription(u.getDescription());
-        return ResponseEntity.ok(userService.saveUser(updatedUser));
+    @PostMapping("/update-profile")
+    public ResponseEntity updateProfile(@Valid @RequestBody User user, Principal principal) {
+        User updateUser = (User) ((Authentication) principal).getPrincipal();
+        updateUser.setEmail(user.getEmail());
+        updateUser.setFullname(user.getFullname());
+        updateUser.setPhone(user.getPhone());
+        updateUser.setDescription(user.getDescription());
+        updateUser.setAvatar(user.getAvatar());
+        return ResponseEntity.ok(userService.updateUser(updateUser));
     }
+
+    @GetMapping("/profile-info")
+    public ResponseEntity<UserModel> getProfile(Principal principal) {
+        User profileUser = (User) ((Authentication) principal).getPrincipal();
+        int id = profileUser.getId();
+        String role = profileUser.getRole();
+        User user = userService.findUserById(id, role);
+        UserModel userModel = userMapper.toModel(user);
+        return new ResponseEntity<UserModel>(userModel, new HttpHeaders(), HttpStatus.OK);
+    }
+
 
     @GetMapping("/count-teacher")
     public List<Integer> totalTeacherByCategory() {
