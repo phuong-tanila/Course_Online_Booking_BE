@@ -1,15 +1,8 @@
 package fa.training.backend.controller;
 
-import fa.training.backend.entities.Course;
-import fa.training.backend.entities.Feedback;
 import fa.training.backend.mapper.FeedbackMapper;
-import fa.training.backend.model.FeedbackModel;
 import fa.training.backend.services.FeedbackService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;

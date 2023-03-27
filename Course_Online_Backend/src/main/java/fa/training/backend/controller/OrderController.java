@@ -9,6 +9,7 @@ import fa.training.backend.mapper.OrderMapper;
 import fa.training.backend.model.ExceptionResponse;
 import fa.training.backend.model.OrderModel;
 import fa.training.backend.services.CourseService;
+import fa.training.backend.services.OrderDetailService;
 import fa.training.backend.services.OrderService;
 import fa.training.backend.util.SortOrder;
 import java.security.Principal;
@@ -30,6 +31,7 @@ import org.springframework.security.core.Authentication;
 @RestController
 @RequestMapping("/order")
 public class OrderController {
+
     @Autowired
     OrderService orderService;
     @Autowired
@@ -38,18 +40,21 @@ public class OrderController {
     public OrderMapper orderMapper;
     @Autowired
     public CourseService courseService;
+    @Autowired
+    public OrderDetailService orderDetailService;
 
-    
     @RolesAllowed("US")
-    @GetMapping("/{userId}")
-    public ResponseEntity<List<OrderModel>> getCourseByCategory(@PathVariable("userId") int userId,
-                                                                @RequestParam(defaultValue = "0") Integer pageNo,
-                                                                @RequestParam(defaultValue = "5") Integer pageSize,
-                                                                @RequestParam(defaultValue = "buyDate,desc") String[] sort
+    @GetMapping("/")
+    public ResponseEntity<List<OrderModel>> getCourseByCategory(
+            Principal principal,
+            @RequestParam(defaultValue = "0") Integer pageNo,
+            @RequestParam(defaultValue = "5") Integer pageSize,
+            @RequestParam(defaultValue = "buyDate,desc") String[] sort
     ) {
         try {
+            User currentUser = (User) ((Authentication) principal).getPrincipal();
             Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortOrder.getSortOrder(sort)));
-            List<Order> orders = orderService.getCoursesByUserId(userId, pageable);
+            List<Order> orders = orderService.getCoursesByUserId(currentUser.getId(), pageable);
             System.err.println(orders);
             List<OrderModel> result = orderMapper.toModelList(orders);
             if (result.isEmpty()) {
@@ -60,6 +65,7 @@ public class OrderController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
     @RolesAllowed("US")
     @PostMapping("/checkout")
     public ResponseEntity checkOut(
@@ -69,7 +75,7 @@ public class OrderController {
             @RequestParam(defaultValue = "false") boolean paymentStatus,
             @RequestParam(defaultValue = "") String coupon,
             @RequestParam(defaultValue = "cod") String paymentMethod
-    ){
+    ) {
         User currentUser = (User) ((Authentication) principal).getPrincipal();
         System.out.println(currentUser);
         Order order = new Order();
@@ -78,8 +84,11 @@ public class OrderController {
         order.setPaymentStatus(paymentStatus);
         order.setBuyDate(new Date());
         order.setPaymentMethod(paymentMethod);
-        order.setOrderDetails(new HashSet<>());
+        Set<OrderDetail> orderDetails = new HashSet<>();
         order.setUser(currentUser);
+//        order.setId();
+        Order createdOrder = orderService.saveOrder(order);
+        System.out.println(order);
         for (Integer courseId : courseIds) {
             try {
                 Course course = courseService.findById(courseId);
@@ -87,7 +96,9 @@ public class OrderController {
                 orderDetail.setCourse(course);
                 orderDetail.setPrice(course.getTuitionFee());
                 System.out.println(order);
-                order.getOrderDetails().add(orderDetail);
+                orderDetail.setOrder(createdOrder);
+                orderDetailService.save(orderDetail);
+                orderDetails.add(orderDetail);
             } catch (RecordNotFoundException ex) {
                 return new ResponseEntity<ExceptionResponse>(
                         new ExceptionResponse(
@@ -98,8 +109,8 @@ public class OrderController {
                 );
             }
         }
-        orderService.saveOrder(order);
-        System.out.println(order);
+//        order.setOrderDetails(orderDetails);
+
         return new ResponseEntity(HttpStatus.CREATED);
     }
 }
