@@ -134,6 +134,7 @@ public class AuthenticateController {
             User mappedUser = userRegisterMapper.toEntity(registerRequestModel);
             mappedUser.setPassword(passwordEncoder.encode(mappedUser.getPassword()));
             mappedUser.setRole("US");
+            mappedUser.setAvatar("https://www.caribbeangamezone.com/wp-content/uploads/2018/03/avatar-placeholder.png");
             User createdUser = userService.createUser(mappedUser);
             TokenAuthModel tokenAuthModel = login(new LoginRequestModel(createdUser.email, registerRequestModel.password));
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);

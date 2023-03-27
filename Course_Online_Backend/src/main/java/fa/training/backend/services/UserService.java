@@ -71,7 +71,4 @@ public class UserService implements UserDetailsService {
 		return userRepository.countTeachersEachCategory();
 	};
 
-	public List<User> findListTeacher(String role){
-		return userRepository.findListTeacher(role);
-	}
 }
