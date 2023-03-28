@@ -41,12 +41,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userService) // Cung cáp userservice cho spring security
                 .passwordEncoder(passwordEncoder()); // cung cấp password encoder
-        List<Integer> seededIds = userService.checkExistUserEmailorPhone("aaa@gmail.com", "0123");
+        List<Integer> seededIds = userService.checkExistUserEmailorPhone("PhuongNH@admin.edu.vn", "0979123456");
         if (seededIds.isEmpty() || seededIds == null) {
             User u = new User();
-            u.setPassword(passwordEncoder().encode("aaa"));
-            u.setEmail("aaa@gmail.com");
+            u.setPassword(passwordEncoder().encode("phuong01"));
+            u.setEmail("PhuongNH@admin.edu.vn");
             u.setRole("AD");
+            u.setDescription("Administration of Website");
+            u.setPhone("0979123456");
+            u.setFullname("Admin");
+            u.setAvatar("https://www.caribbeangamezone.com/wp-content/uploads/2018/03/avatar-placeholder.png");
             userService.createUser(u);
         }
     }

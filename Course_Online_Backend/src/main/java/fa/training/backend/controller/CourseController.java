@@ -98,8 +98,6 @@ public class CourseController {
         try {
             Course course = courseService.findById(courseId);
             course = courseMapper.toEntity(courseModel);
-            log.error(course.toString());
-            log.error(courseModel.toString());
 //            course.setStatus(false);
 //            courseService.createCourseOrUpdate(course);
             return new ResponseEntity(HttpStatus.NO_CONTENT);
@@ -338,6 +336,7 @@ public class CourseController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
     @PatchMapping("/d/")
     public ResponseEntity<CourseModel> test3(@RequestBody Course course) {
         try {
