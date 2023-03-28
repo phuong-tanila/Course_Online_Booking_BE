@@ -26,7 +26,12 @@ public class CourseService {
     }
 
     public List<Course> getAllCourses(Integer pageNo, Integer pageSize, String sortBy) {
-        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
+        Pageable pageable;
+        if(sortBy.equals("tuitionFee")){
+            pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
+        }else{
+            pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
+        }
         Page<Course> pagedResult = courseRepository.findAll(pageable);
         if (pagedResult.hasContent()) {
             return pagedResult.getContent();
@@ -44,6 +49,10 @@ public class CourseService {
         }
     }
 
+    
+    public void softDeleteCourse(Course course){
+//        courseRepository.
+    }
     public List<Course> findByCourseName(Integer pageNo, Integer pageSize, HashMap<String, String> orderHashMap, String courseName) {
         Pageable pageable = ServiceHelper.getPageable(pageNo, pageSize, orderHashMap);
         return courseRepository.findByCourseNameIgnoreCaseContaining(courseName, pageable);
@@ -60,12 +69,12 @@ public class CourseService {
     public Course findById(int id) throws RecordNotFoundException {
         Optional<Course> course = courseRepository.findById(id);
         if (course.isPresent()) {
-			System.out.println(course.get().chapters);
-			return course.get();
-		} else {
-			throw new RecordNotFoundException("No course exist for given id");
-		}
-       
+            System.out.println(course.get().chapters);
+            return course.get();
+        } else {
+            throw new RecordNotFoundException("No course exist for given id");
+        }
+
     }
 
     public Optional<Course> findByIdIsActive(int id) {
@@ -89,19 +98,13 @@ public class CourseService {
         }
     }
 
-    //    public List<Course> getCourseByCategory(Integer pageNo, Integer pageSize, String sortBy, String direction, List<Category> categories) {
-//        Sort sort;
-//        if (direction.equalsIgnoreCase("desc")) {
-//            sort = Sort.by(Sort.Direction.DESC, sortBy);
-//        } else {
-//            sort = Sort.by(Sort.Direction.ASC, sortBy);
-//        }
-//        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
-//        List<Course> courses = courseRepository.findCourseByCategoriesIn(categories, pageable);
-//        return courses;
-//    }
     public List<Course> findCourseByCategory(int categoryId, Pageable pageable) {
         List<Course> courses = courseRepository.findCoursesByCategory(categoryId, pageable);
+        return courses;
+    }
+
+    public List<Course> searchCoursesByName(String name, Pageable pageable) {
+        List<Course> courses = courseRepository.searchCoursesByName(name, new Date(), pageable);
         return courses;
     }
 
@@ -109,12 +112,28 @@ public class CourseService {
         List<Course> courses = courseRepository.findCourseByCategoriesIn(categories);
         return courses;
     }
-//	public List<Course> sortByRating
-    public int totalCourseByCate(int categoryId){
+
+    //	public List<Course> sortByRating
+    public int totalCourseByCate(int categoryId) {
         return courseRepository.countAllCoursesByCate(categoryId);
     }
 
-    public int totalCourse(){
+    public int totalCourse() {
         return courseRepository.countAllCourse();
     }
+
+    public int totalCourseByName(String name) {
+        return courseRepository.countCourseByName(name, new Date());
+    }
+    public Course createCourseOrUpdate(Course course){
+        return courseRepository.save(course);
+    }
+    public void deleteCourse(int courseId){
+        courseRepository.deleteById(courseId);
+    }
+
+    public List<Integer> getQuantityCourses(){
+        return courseRepository.getQuantityCoursesByCategory();
+    }
+
 }

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/categories")
 public class CategoryController {
     @Autowired
@@ -69,6 +70,22 @@ public class CategoryController {
         }
     }
 
+    @GetMapping("/quantity-course-by-category")
+    public List<Integer> totalCourseByCategory (){
+        try {
+            return courseService.getQuantityCourses();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    @GetMapping("/")
+    public ResponseEntity<List<CategoryModel>> getAllCategory(){
+        List<Category> listCategory = categoryService.getAllCategory();
+        List<CategoryModel> result = categoryMapper.toListModel(listCategory);
+        return new ResponseEntity<List<CategoryModel>>(result, new HttpHeaders(), HttpStatus.OK);
+    }
 //    @GetMapping("")
 //    public ResponseEntity<List<CourseModel>> getAllCourses(
 //            @RequestParam(defaultValue = "0") Integer pageNo,
@@ -79,10 +96,4 @@ public class CategoryController {
 //        return new ResponseEntity<List<CourseModel>>(result, new HttpHeaders(), HttpStatus.OK);
 //    }
 
-    @GetMapping("/")
-    public ResponseEntity<List<CategoryModel>> getAllCategory(){
-        List<Category> listCategory = categoryService.getAllCategory();
-        List<CategoryModel> result = categoryMapper.toListModel(listCategory);
-        return new ResponseEntity<List<CategoryModel>>(result, new HttpHeaders(), HttpStatus.OK);
-    }
 }

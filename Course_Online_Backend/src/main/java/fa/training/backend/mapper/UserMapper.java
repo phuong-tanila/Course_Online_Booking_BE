@@ -1,8 +1,6 @@
 package fa.training.backend.mapper;
 
-import fa.training.backend.entities.Feedback;
 import fa.training.backend.entities.User;
-import fa.training.backend.model.FeedbackModel;
 import fa.training.backend.model.UserModel;
 import org.mapstruct.Mapper;
 

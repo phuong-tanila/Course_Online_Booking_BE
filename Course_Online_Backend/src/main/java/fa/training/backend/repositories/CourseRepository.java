@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import fa.training.backend.entities.Category;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -34,7 +33,6 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
 
     public List<Course> findCourseByCategoriesIn(List<Category> categories, Pageable pageable);
 
-
     @Query(" from Course ")
     public List<Course> customGetCouse();
 
@@ -42,6 +40,14 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
 
     @Query("select count(c.id) from Course c JOIN c.categories ct WHERE ct.id = ?1")
     public int countAllCoursesByCate(int categoryId);
+
+    @Query("select count(c.id) from Course c JOIN c.categories ct GROUP BY ct.id")
+    public List<Integer> getQuantityCoursesByCategory();
     @Query("select count(c.id) from Course c")
     public int countAllCourse();
+    @Query("SELECT c FROM Course c WHERE c.courseName LIKE %?1% AND c.createDate < ?2")
+    public List<Course> searchCoursesByName(String name, Date date, Pageable pageable);
+
+    @Query("SELECT count(c.id) FROM Course c WHERE c.courseName LIKE %?1% AND c.createDate < ?2")
+    public int countCourseByName(String name, Date date);
 }

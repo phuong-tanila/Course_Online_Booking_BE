@@ -18,6 +18,7 @@ import lombok.*;
 @Transactional
 @JsonSerialize
 @Entity
+@ToString
 @Table(name = "course")
 @EqualsAndHashCode
 public class Course implements Serializable {

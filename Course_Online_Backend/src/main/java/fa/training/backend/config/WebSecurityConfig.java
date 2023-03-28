@@ -1,11 +1,11 @@
 package fa.training.backend.config;
 
-
 import java.util.Date;
 
 import fa.training.backend.entities.User;
 import fa.training.backend.filters.CustomAuthenticationFilter;
 import fa.training.backend.services.UserService;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,15 +16,13 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.rememberme.InMemoryTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentRememberMeToken;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
-import org.springframework.web.filter.OncePerRequestFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -43,11 +41,20 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userService) // Cung cáp userservice cho spring security
                 .passwordEncoder(passwordEncoder()); // cung cấp password encoder
-        User u = new User();
-        u.setPassword(passwordEncoder().encode("aaa"));
-        u.setEmail("aaa@gmail.com");
-//        userService.createUser(u);
+        List<Integer> seededIds = userService.checkExistUserEmailorPhone("PhuongNH@admin.edu.vn", "0979123456");
+        if (seededIds.isEmpty() || seededIds == null) {
+            User u = new User();
+            u.setPassword(passwordEncoder().encode("phuong01"));
+            u.setEmail("PhuongNH@admin.edu.vn");
+            u.setRole("AD");
+            u.setDescription("Administration of Website");
+            u.setPhone("0979123456");
+            u.setFullname("Admin");
+            u.setAvatar("https://www.caribbeangamezone.com/wp-content/uploads/2018/03/avatar-placeholder.png");
+            userService.createUser(u);
+        }
     }
+
     @Bean(BeanIds.AUTHENTICATION_MANAGER)
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
@@ -60,36 +67,26 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf()
                 .disable()
                 .authorizeRequests()
-                .antMatchers("/", "/logout", "/login", "/register")
+                .antMatchers("/auth", "/auth/login/**", "/auth/register", "/auth/refresh")
                 .permitAll()
-                .antMatchers( HttpMethod.GET ,"/courses/**", "/course-detail/**", "/categories/**")
+                .antMatchers(HttpMethod.GET, "/courses/**", "/course-detail/**", "/categories/**", "/user/**", "/order/**", "/feedback/**", "/admin/**", "/profile/**")
                 .permitAll()
-                .anyRequest()
+                .antMatchers(HttpMethod.GET, "/user/profile-info")
                 .authenticated()
-                .and()
-                .exceptionHandling()
+                .anyRequest().authenticated()
+                .and().exceptionHandling()
                 .accessDeniedPage("/403")
-                .and()
-                .addFilterBefore(new CustomAuthenticationFilter(userService), UsernamePasswordAuthenticationFilter.class);
-//        http.csrf().disable()
-////                .authorizeRequests()
-////                .antMatchers("/", "/logout", "/login", "/register", "/courses/**", "/course-detail/**", "/category/**")
-////                    .permitAll()
-////                .anyRequest()
-////                    .authenticated()
-////                .and()
-////                    .exceptionHandling()
-////                    .accessDeniedPage("/403")
-////                .and()
-////                .addFilterBefore(new CustomAuthenticationFilter(userService), UsernamePasswordAuthenticationFilter.class);
-
+                .and().sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and().addFilterBefore(
+                        new CustomAuthenticationFilter(userService),
+                        UsernamePasswordAuthenticationFilter.class
+                );
 
 //        http.authorizeRequests().antMatchers("/user-info").access("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')");
 //
 //        http.authorizeRequests().antMatchers("/admin").access("hasRole('ROLE_ADMIN')");
-
 //        http.authorizeRequests().and().exceptionHandling().accessDeniedPage("/403");
-
 //        http.authorizeRequests()
 //                .antMatchers("/", "/logout", "/login")
 //                    .permitAll()
