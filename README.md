@@ -1,6 +1,6 @@
 # Course_Online_Booking_BE
 
-## Team member:
+## Dev
 - Nguyen Hoai Phuong
 
 ## Component
