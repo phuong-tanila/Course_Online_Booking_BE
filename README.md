@@ -1,8 +1,7 @@
 # Course_Online_Booking_BE
 
 ## Team member:
-- Nguyen Hoai Phuong (Leader)
-- Pham Phuc Thinh
+- Nguyen Hoai Phuong
 
 ## Component
 - Java
